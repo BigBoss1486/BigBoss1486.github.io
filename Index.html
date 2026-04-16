@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Big Boss</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Orbitron', monospace;
+    background: radial-gradient(circle at center, #001a0f 0%, #000000 80%);
+    color: #00ff88;
+    overflow-x: hidden;
+}
+
+/* HUD линии */
+body::after {
+    content: "";
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,255,136,0.05),
+        rgba(0,255,136,0.05) 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    animation: scan 6s linear infinite;
+}
+
+/* РЕДКОЕ ГЛИТЧ-МЕРЦАНИЕ */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0,255,136,0.04), transparent 60%);
+    pointer-events: none;
+    animation: flicker 11s infinite;
+}
+
+@keyframes scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+}
+
+@keyframes flicker {
+    0%, 94%, 100% { opacity: 0.12; }
+    95% { opacity: 0.28; }
+    96% { opacity: 0.08; }
+    97% { opacity: 0.24; }
+    98% { opacity: 0.06; }
+    99% { opacity: 0.20; }
+}
+
+/* HEADER */
+header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 2px solid #00ff88;
+    font-size: 32px;
+    text-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88;
+    letter-spacing: 3px;
+}
+
+/* STATUS */
+#statusBar {
+    text-align: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid #00ff88;
+    font-size: 12px;
+    text-shadow: 0 0 10px #00ff88;
+    letter-spacing: 2px;
+}
+
+/* БЕГУЩАЯ СТРОКА */
+.marquee {
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid #00ff88;
+    background: rgba(0, 20, 10, 0.6);
+}
+
+.marquee-text {
+    display: inline-block;
+    white-space: nowrap;
+    padding: 8px 0;
+    animation: marqueeMove 15s linear infinite;
+    text-shadow: 0 0 10px #00ff88;
+}
+
+@keyframes marqueeMove {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* MENU */
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #00ff88;
+}
+
+nav a {
+    color: #00ff88;
+    text-decoration: none;
+    padding: 8px 15px;
+    border: 1px solid #00ff88;
+    transition: 0.3s;
+    box-shadow: 0 0 5px #00ff88;
+}
+
+nav a:hover {
+    background: #00ff88;
+    color: black;
+    box-shadow: 0 0 20px #00ff88;
+}
+
+/* ССЫЛКИ */
+a {
+    position: relative;
+    color: #00ff88;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #ffffff;
+    text-shadow: 0 0 8px #ffffff;
+}
+
+a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    transition: width 0.4s ease;
+}
+
+a:hover::after {
+    width: 100%;
+}
+
+/* TABS */
+.tab {
+    display: none;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 20px #00ff88;
+    background: rgba(0,10,5,0.9);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.active {
+    display: block;
+}
+
+/* IMAGE */
+img {
+    display: block;
+    margin: 20px auto;
+    max-width: 350px;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 25px #00ff88;
+}
+
+/* СПИСОК */
+ul li {
+    margin: 10px 0;
+}
+
+/* СЕКРЕТ 1 */
+.secret {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 10px;
+    opacity: 0.2;
+    cursor: pointer;
+}
+
+/* СЕКРЕТ 2 */
+.secret2 {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 80px;
+    height: 80px;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ЭФФЕКТ ПЕЧАТИ */
+.typing {
+    display: inline-block;
+    border-right: 2px solid #00ff88;
+    white-space: nowrap;
+    text-shadow: 0 0 0px #00ff88;
+}
+
+/* МЯГКАЯ ПОДСВЕТКА */
+.glow {
+    animation: glowIn 1.2s ease forwards;
+}
+
+@keyframes glowIn {
+    from {
+        text-shadow: 0 0 0px #00ff88;
+    }
+    to {
+        text-shadow: 0 0 12px #00ff88;
+    }
+}
+
+.blink {
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+
+/* СКАНЕР ПОВЕРХ КАРТИНКИ */
+.img-scan {
+    position: relative;
+    display: block;
+    margin: 20px auto;
+    max-width: 350px;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 25px #00ff88;
+    overflow: hidden;
+}
+
+.img-scan img {
+    display: block;
+    width: 100%;
+    margin: 0;
+    max-width: 100%;
+    border: none;
+    box-shadow: none;
+}
+
+.img-scan::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0,255,136,0.25),
+        transparent
+    );
+    animation: scanMove 3s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes scanMove {
+    0% { top: -40%; }
+    100% { top: 100%; }
+}
+
+/* ГАЛЕРЕЯ */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 10px;
+}
+
+.gallery-item {
+    border: 1px solid rgba(0, 255, 136, 0.7);
+    box-shadow: 0 0 18px rgba(0, 255, 136, 0.25);
+    background: rgba(0, 10, 5, 0.65);
+    overflow: hidden;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    display: block;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    max-width: none;
+    cursor: pointer;
+}
+
+.gallery-item.full {
+    grid-column: 1 / -1;
+}
+
+.gallery-item.full img {
+    height: 420px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 700px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-item.full {
+        grid-column: auto;
+    }
+}
+
+/* КОММЕНТАРИИ */
+.comment-form {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comment-input,
+.comment-textarea {
+    width: 100%;
+    background: black;
+    color: #00ff88;
+    border: 1px solid #00ff88;
+    padding: 8px;
+    font-family: 'Orbitron', monospace;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.comment-textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.comment-button {
+    background: black;
+    color: #00ff88;
+    border: 1px solid #00ff88;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    box-shadow: 0 0 5px #00ff88;
+    width: fit-content;
+}
+
+.comment-button:hover {
+    background: #00ff88;
+    color: black;
+    box-shadow: 0 0 20px #00ff88;
+}
+
+.comment-list {
+    margin-top: 20px;
+    display: grid;
+    gap: 10px;
+}
+
+.comment-item {
+    border: 1px solid #00ff88;
+    padding: 10px;
+    box-shadow: 0 0 10px #00ff88;
+    background: rgba(0, 10, 5, 0.65);
+}
+
+/* CODEC */
+.codec-panel {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.codec-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.codec-btn {
+    background: black;
+    color: #00ff88;
+    border: 1px solid #00ff88;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'Orbitron', monospace;
+    box-shadow: 0 0 5px #00ff88;
+}
+
+.codec-btn:hover {
+    background: #00ff88;
+    color: black;
+    box-shadow: 0 0 20px #00ff88;
+}
+
+.codec-screen {
+    min-height: 120px;
+    border: 1px solid #00ff88;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 0 18px rgba(0,255,136,0.12);
+    white-space: pre-wrap;
+}
+
+/* ДОСЬЕ */
+.dossier-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.hidden-info {
+    cursor: pointer;
+    opacity: 0.55;
+}
+
+.hidden-info:hover {
+    opacity: 1;
+    text-shadow: 0 0 8px #00ff88;
+}
+
+/* ТЕРМИНАЛ */
+.terminal {
+    margin-top: 18px;
+    padding: 12px;
+    border: 1px solid #00ff88;
+    background: rgba(0, 0, 0, 0.72);
+    box-shadow: 0 0 14px rgba(0,255,136,0.2);
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+
+.terminal-cursor {
+    display: inline-block;
+    animation: blink 0.7s infinite;
+}
+
+/* MODAL */
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 999;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-inner {
+    max-width: 90vw;
+    max-height: 90vh;
+    text-align: center;
+}
+
+.modal-inner img {
+    max-width: 90vw;
+    max-height: 75vh;
+    margin: 0 auto;
+    border: 2px solid #00ff88;
+    box-shadow: 0 0 30px #00ff88;
+}
+
+.modal-caption {
+    margin-top: 12px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #00ff88;
+}
+
+/* SECRET BACKGROUND */
+#ddBg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    background:
+        radial-gradient(circle at center, rgba(0,255,136,0.10) 0%, rgba(0,0,0,0.88) 70%),
+        repeating-linear-gradient(
+            135deg,
+            rgba(0,255,136,0.06) 0px,
+            rgba(0,255,136,0.06) 2px,
+            transparent 2px,
+            transparent 10px
+        );
+    z-index: 0;
+}
+#ddBg::after {
+    content: "DIAMOND DOGS";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: min(14vw, 120px);
+    letter-spacing: 10px;
+    color: rgba(0,255,136,0.08);
+    text-shadow: 0 0 25px rgba(0,255,136,0.10);
+    transform: rotate(-8deg);
+}
+</style>
+</head>
+
+<body>
+
+<div id="ddBg"></div>
+
+<header>Человек, продавший мир</header>
+<div id="statusBar">STATUS: ONLINE</div>
+
+<div class="marquee">
+    <div class="marquee-text">
+        ⚠ SYSTEM ONLINE ⚠ BIG BOSS ACTIVE ⚠ NO GODS. NO MASTERS. ONLY WAR ⚠
+    </div>
+</div>
+
+<nav>
+    <a href="#" onclick="openTab('home')">Главная</a>
+    <a href="#" onclick="openTab('story')">История</a>
+    <a href="#" onclick="openTab('games')">Игры</a>
+    <a href="#" onclick="openTab('gallery')">Галерея</a>
+    <a href="#" onclick="openTab('comments')">Комментарии</a>
+    <a href="#" onclick="openTab('codec')">CODEC</a>
+    <a href="#" onclick="openTab('dossier')">Досье</a>
+</nav>
+
+<!-- Главная -->
+<div id="home" class="tab active">
+    <h2 id="typingText" class="typing"></h2>
+    <div class="img-scan">
+        <img src="https://static.wikia.nocookie.net/metalgear/images/3/32/TPPTrueBigBossPP.png/revision/latest/scale-to-width/360?cb=20150902050414">
+    </div>
+
+    <div class="terminal">
+> access: big_boss
+> decrypt: history
+> status: <span id="terminalStatus">online</span> <span class="terminal-cursor">█</span>
+    </div>
+</div>
+
+<!-- История -->
+<div id="story" class="tab">
+    <h2>История</h2>
+    <p>
+        Настоящее имя <a href="https://ru.wikipedia.org/wiki/%D0%91%D0%B8%D0%B3_%D0%91%D0%BE%D1%81%D1%81_(Metal_Gear)" target="_blank">Биг Босс</a>а — Нейкед Снейк. Он был учеником легендарного солдата по имени The Boss и прошёл через операцию <a href="https://metalgear.fandom.com/ru/wiki/%D0%9E%D0%BF%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F_%22%D0%9F%D0%BE%D0%B6%D0%B8%D1%80%D0%B0%D1%82%D0%B5%D0%BB%D1%8C_%D0%B7%D0%BC%D0%B5%D0%B9%22" target="_blank">Snake Eater</a> во время холодной войны.
+    </p>
+    
+    <p>
+        Во время этой миссии он был вынужден убить своего наставника, чтобы выполнить приказ правительства США. Это событие полностью изменило его мировоззрение — он понял, что солдаты лишь инструменты в руках политиков.
+    </p>
+    
+    <p>
+        После этого он получил титул "Big Boss", но отказался от идеалов своей страны. Он стремился создать мир, где солдаты не будут использоваться и предаваться — мир, где у них будет своя собственная нация.
+    </p>
+    
+    <p>
+        Он основал организацию Militaires Sans Frontières, а позже Diamond Dogs, создавая армии без границ. Однако его идеалы постепенно искажались, и он стал фигурой, балансирующей между героем и злодеем.
+    </p>
+    
+    <p>
+        В итоге Биг Босс стал символом войны и легендой, оставив после себя сложное наследие, которое повлияло на весь мир <a href="https://ru.wikipedia.org/wiki/Metal_Gear" target="_blank">Metal Gear</a>.
+    </p>
+</div>
+
+<!-- Игры -->
+<div id="games" class="tab">
+    <h2>Игры</h2>
+    <ul>
+        <li><a href="https://ru.wikipedia.org/wiki/Metal_Gear_Solid_3:_Snake_Eater" target="_blank">Metal Gear Solid 3: Snake Eater</a></li>
+        <li><a href="https://ru.wikipedia.org/wiki/Metal_Gear_Solid:_Peace_Walker" target="_blank">Metal Gear Solid: Peace Walker</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Metal_Gear_Solid_V:_Ground_Zeroes" target="_blank">Metal Gear Solid V: Ground Zeroes</a></li>
+        <li><a href="https://ru.wikipedia.org/wiki/Metal_Gear_Solid_V:_The_Phantom_Pain" target="_blank">Metal Gear Solid V: The Phantom Pain</a></li>
+    </ul>
+</div>
+
+<!-- Галерея -->
+<div id="gallery" class="tab">
+    <h2>Галерея</h2>
+    <div class="gallery-grid">
+        <div class="gallery-item">
+            <img src="https://static.wikia.nocookie.net/metalgear/images/d/df/Mgspw-naked-snake-render.jpg/revision/latest?cb=20111108201854" alt="Naked Snake">
+        </div>
+        <div class="gallery-item">
+            <img src="https://static.wikia.nocookie.net/metalgear/images/1/14/Big_Boss_GZ_infobox.png/revision/latest?cb=20251016213514" alt="Big Boss Ground Zeroes">
+        </div>
+        <div class="gallery-item">
+            <img src="https://static.wikia.nocookie.net/metalgear/images/d/dd/MGS4BigBossPP.png/revision/latest?cb=20150603143820&path-prefix=ru" alt="Big Boss PP">
+        </div>
+        <div class="gallery-item">
+            <img src="https://articles-img.sftcdn.net/auto-mapping-folder/sites/3/2021/05/MGS3-Naked-Snake-Virtuous-Mission.jpg" alt="Virtuous Mission">
+        </div>
+        <div class="gallery-item full">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG8wcHVpbHd3dGlicnN4bjhsY2loaWFweW50NnN1NmIzd3I2bjljdCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Du842vHOEC9Ge8aQBe/giphy.gif" alt="Big Boss GIF">
+        </div>
+    </div>
+</div>
+
+<!-- Комментарии -->
+<div id="comments" class="tab">
+    <h2>Комментарии</h2>
+
+    <div class="comment-form">
+        <input id="name" class="comment-input" placeholder="Имя">
+        <textarea id="commentText" class="comment-textarea" placeholder="Комментарий"></textarea>
+        <button class="comment-button" onclick="addComment()">Отправить</button>
+    </div>
+
+    <div id="commentList" class="comment-list"></div>
+</div>
+
+<!-- CODEC -->
+<div id="codec" class="tab">
+    <h2>📞 CODEC</h2>
+    <div class="codec-panel">
+        <div class="codec-contacts">
+            <button class="codec-btn" onclick="codecCall('boss')">Big Boss</button>
+            <button class="codec-btn" onclick="codecCall('zero')">Zero</button>
+            <button class="codec-btn" onclick="codecCall('ocelot')">Ocelot</button>
+        </div>
+        <div id="codecScreen" class="codec-screen">> signal ready...</div>
+    </div>
+</div>
+
+<!-- ДОСЬЕ -->
+<div id="dossier" class="tab">
+    <h2>CLASSIFIED DOSSIER</h2>
+    <div class="dossier-grid">
+        <p>Рост: 182 см</p>
+        <p>Статус: CLASSIFIED</p>
+        <p>Кодовое имя: Naked Snake / Big Boss</p>
+        <p class="hidden-info" data-reveal="Ранг: Legendary soldier">[РАСКРЫТЬ РАНГ]</p>
+        <p class="hidden-info" data-reveal="Принадлежность: FOX, Militaires Sans Frontières, Diamond Dogs">[РАСКРЫТЬ ПРИМЕЧАНИЕ]</p>
+        <p class="hidden-info" data-reveal="Наблюдение: Kept you waiting, huh?">[РАСКРЫТЬ СКРЫТУЮ СТРОКУ]</p>
+    </div>
+</div>
+
+<div id="secretTab" class="tab">
+    <h2>📞 CODEC CONNECTED</h2>
+    <p>Encrypted transmission received...</p>
+</div>
+
+<div id="modal" class="modal" onclick="closeModal(event)">
+    <div class="modal-inner">
+        <img id="modalImg" alt="classified image">
+        <div class="modal-caption">CLASSIFIED IMAGE</div>
+    </div>
+</div>
+
+<audio id="codecSound" src="https://www.myinstants.com/media/sounds/codec.mp3"></audio>
+<audio id="snakeSound" src="https://www.zedge.net/notification-sounds/a41f7d41-3bb5-4bfe-8f23-bd0a27f10f67"></audio>
+
+<div class="secret" onclick="openSecret()">...</div>
+<div class="secret2" onclick="playSnake()"></div>
+
+<script>
+let audioCtx = null;
+let ambientNode = null;
+let ambientGain = null;
+let audioReady = false;
+
+function initAudio() {
+    if (audioReady) return;
+
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+
+    audioCtx = new Ctx();
+
+    const bufferSize = audioCtx.sampleRate * 2;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.12;
+    }
+
+    ambientNode = audioCtx.createBufferSource();
+    ambientNode.buffer = buffer;
+    ambientNode.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 850;
+
+    ambientGain = audioCtx.createGain();
+    ambientGain.gain.value = 0.012;
+
+    ambientNode.connect(filter);
+    filter.connect(ambientGain);
+    ambientGain.connect(audioCtx.destination);
+
+    ambientNode.start();
+    audioReady = true;
+}
+
+function uiSound(freq, duration, volume) {
+    if (!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = freq;
+
+    gain.gain.value = volume;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+function openTab(tabId) {
+    initAudio();
+    if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
+
+    uiSound(420, 0.05, 0.015);
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+
+    const s = document.getElementById("statusBar");
+    const ts = document.getElementById("terminalStatus");
+
+    if (tabId === "home") {
+        s.textContent = "STATUS: ONLINE";
+        if (ts) ts.textContent = "online";
+    } else if (tabId === "gallery") {
+        s.textContent = "STATUS: SCANNING";
+        if (ts) ts.textContent = "scanning";
+    } else if (tabId === "codec") {
+        s.textContent = "STATUS: COMMUNICATION";
+        if (ts) ts.textContent = "communication";
+    } else if (tabId === "dossier") {
+        s.textContent = "STATUS: ALERT";
+        if (ts) ts.textContent = "alert";
+    } else {
+        s.textContent = "STATUS: ACTIVE";
+        if (ts) ts.textContent = "active";
+    }
+}
+
+function openSecret() {
+    openTab('secretTab');
+    document.getElementById("codecSound").play();
+}
+
+function playSnake() {
+    document.getElementById("snakeSound").play();
+}
+
+const text = "Я Биг Босс - и ты тоже";
+const el = document.getElementById("typingText");
+
+let i = 0;
+function type() {
+    if (i < text.length) {
+        el.textContent += text[i++];
+        setTimeout(type, 70);
+    } else {
+        el.classList.add("glow");
+    }
+}
+type();
+
+function loadComments() {
+    const list = document.getElementById("commentList");
+    list.innerHTML = "";
+
+    const comments = JSON.parse(localStorage.getItem("bb_comments") || "[]");
+
+    comments.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "comment-item";
+        div.innerHTML = `<strong>${c.name}</strong><br>${c.text}`;
+        list.appendChild(div);
+    });
+}
+
+function addComment() {
+    const name = document.getElementById("name").value || "Аноним";
+    const text = document.getElementById("commentText").value;
+
+    if (!text.trim()) return;
+
+    const comments = JSON.parse(localStorage.getItem("bb_comments") || "[]");
+    comments.unshift({ name, text });
+    localStorage.setItem("bb_comments", JSON.stringify(comments));
+
+    document.getElementById("commentText").value = "";
+    loadComments();
+}
+
+function codecCall(type) {
+    initAudio();
+    if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+    }
+
+    uiSound(620, 0.05, 0.013);
+
+    const lines = {
+        boss: [
+            "Big Boss: ты уже знаешь правду.",
+            "Big Boss: солдаты не выбирают войну.",
+            "Big Boss: мир всегда требует жертв."
+        ],
+        zero: [
+            "Zero: система важнее человека.",
+            "Zero: порядок держится на контроле.",
+            "Zero: ты видишь только поверхность."
+        ],
+        ocelot: [
+            "Ocelot: хех... ты не изменился.",
+            "Ocelot: игра только начинается.",
+            "Ocelot: доверься инстинкту."
+        ]
+    };
+
+    const pool = lines[type] || ["..."];
+    const message = pool[Math.floor(Math.random() * pool.length)];
+    document.getElementById("codecScreen").textContent = `> contact: ${type.toUpperCase()}\n> ${message}`;
+}
+
+function openImage(src) {
+    document.getElementById("modalImg").src = src;
+    document.getElementById("modal").style.display = "flex";
+}
+
+function closeModal(event) {
+    if (event.target.id === "modal" || event.target.classList.contains("modal-inner")) {
+        document.getElementById("modal").style.display = "none";
+    }
+}
+
+document.querySelectorAll(".gallery-item img").forEach(img => {
+    img.addEventListener("click", () => openImage(img.src));
+});
+
+document.querySelectorAll("nav a, .codec-btn, .comment-button").forEach(elm => {
+    elm.addEventListener("mouseenter", () => {
+        initAudio();
+        if (audioCtx && audioCtx.state === "suspended") {
+            audioCtx.resume();
+        }
+        uiSound(880, 0.03, 0.008);
+    });
+});
+
+document.querySelectorAll(".hidden-info").forEach(item => {
+    item.addEventListener("click", () => {
+        item.textContent = item.dataset.reveal;
+        item.classList.remove("hidden-info");
+    });
+});
+
+let eyeClicks = 0;
+const bossImg = document.querySelector(".img-scan img");
+if (bossImg) {
+    bossImg.style.cursor = "pointer";
+    bossImg.addEventListener("click", () => {
+        eyeClicks++;
+        if (eyeClicks === 10) {
+            document.getElementById("ddBg").style.opacity = "0.18";
+            openTab("codec");
+            codecCall("boss");
+            playSnake();
+        }
+    });
+}
+
+loadComments();
+openTab("home");
+</script>
+
+</body>
+</html>
